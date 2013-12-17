@@ -1,9 +1,9 @@
-;;; anything-milkode.el --- Command line search with Milkode
+;;; helm-milkode.el --- Command line search with Milkode
 
 ;; Copyright (C) 2013 ongaeshi
 
 ;; Author: ongaeshi
-;; Keywords: milkode, anything, search, grep, jump, keyword
+;; Keywords: milkode, helm, search, grep, jump, keyword
 ;; Version: 0.3
 ;; Package-Requires:
 
@@ -29,36 +29,36 @@
 ;;; Commentary:
 
 ;;; Install:
-;;   (auto-install-from-url "http://www.emacswiki.org/cgi-bin/wiki/download/anything-grep.el")
+;;   (auto-install-from-url "http://www.emacswiki.org/cgi-bin/wiki/download/helm-grep.el")
 ;;   (auto-install-from-url "https://raw.github.com/ongaeshi/emacs-milkode/master/milkode.el")
-;;   (auto-install-from-url "https://raw.github.com/ongaeshi/emacs-milkode/master/anything-milkode.el")
+;;   (auto-install-from-url "https://raw.github.com/ongaeshi/emacs-milkode/master/helm-milkode.el")
 
 ;;; Initlial Setting:
-;; (require 'anything-milkode)
+;; (require 'helm-milkode)
 ;;
-;; ;; Use anything-grep single line mode
-;; (setq anything-grep-multiline nil)                
-;; 
+;; ;; Use helm-grep single line mode
+;; (setq helm-grep-multiline nil)
+;;
 ;; ;; Shortcut setting
-;; (global-set-key (kbd "M-g") 'anything-milkode)
-;; (global-set-key (kbd "C-x a f") 'anything-milkode-files)
+;; (global-set-key (kbd "M-g") 'helm-milkode)
+;; (global-set-key (kbd "C-x a f") 'helm-milkode-files)
 ;;
 ;; ;; popwin setting (Optional)
 ;; (push '("*grep*" :noselect t)       popwin:special-display-config)
-;; (push '("*anything milkode*")       popwin:special-display-config)
-;; (push '("*anything milkode files*") popwin:special-display-config)
+;; (push '("*helm milkode*")       popwin:special-display-config)
+;; (push '("*helm milkode files*") popwin:special-display-config)
 
 ;;; Code:
 
 ;;; Variables:
 
 ;;; Public:
-(require 'anything-grep)
+(require 'helm-grep)
 (require 'milkode)
 
 ;;;###autoload
-(defun anything-milkode (n)
-  "Milkode search using `anything-grep`.
+(defun helm-milkode (n)
+  "Milkode search using `helm-grep`.
 With C-u `milkode:search`"
   (interactive "P")
   (let ((at-point (thing-at-point 'filename))
@@ -67,26 +67,26 @@ With C-u `milkode:search`"
         (milkode:search)
       (if (milkode:is-directpath at-point)
         (progn
-          (setq milkode:history (cons at-point milkode:history)) 
+          (setq milkode:history (cons at-point milkode:history))
           (milkode:jump-directpath at-point))
-      (let* ((input   (read-string "anything-milkode: " (thing-at-point 'symbol) 'milkode:history))
+      (let* ((input   (read-string "helm-milkode: " (thing-at-point 'symbol) 'milkode:history))
          (command (concat gmilk-command " " input))
          (pwd     default-directory))
         (if (milkode:is-directpath input)
             (milkode:jump-directpath input)
-          (anything-grep-base (list (agrep-source (agrep-preprocess-command command) pwd))
-                              "*anything milkode*")))))))
+          (helm-grep-base (list (agrep-source (agrep-preprocess-command command) pwd))
+                              "*helm milkode*")))))))
 
-(defun anything-c-sources-milkode-files (pwd is-rebuild)
+(defun helm-c-sources-milkode-files (pwd is-rebuild)
   (loop for elt in
         '(("milk files (%s)" . ""))
         collect
         `((name . ,(format (car elt) pwd))
           (init . (lambda ()
-                    (when (or (not (anything-candidate-buffer))
+                    (when (or (not (helm-candidate-buffer))
                               ,is-rebuild)
                       (with-current-buffer
-                          (anything-candidate-buffer 'global)
+                          (helm-candidate-buffer 'global)
                         (insert
                          (shell-command-to-string
                           ,(format (concat milk-command " files -r")
@@ -94,33 +94,33 @@ With C-u `milkode:search`"
           (candidates-in-buffer)
           (type . file))))
 
-(defvar anything-c-source-milkode-packages
+(defvar helm-c-source-milkode-packages
   '((name . "Milkode Packages")
     (init . (lambda ()
-              (unless (anything-candidate-buffer)
+              (unless (helm-candidate-buffer)
                 (with-current-buffer
-                  (anything-candidate-buffer 'global)
+                  (helm-candidate-buffer 'global)
                 (insert (shell-command-to-string (format "%s list -d" milk-command)))))))
     (candidates-in-buffer)
     (type . file)
     (real-to-display . (lambda (c) (file-name-nondirectory c)))))
 
 ;;;###autoload
-(defun anything-milkode-files (n)
-  "Jump to registered files and package directories with `anything`.
+(defun helm-milkode-files (n)
+  "Jump to registered files and package directories with `helm`.
 With C-u clear cache."
   (interactive "P")
   (let* ((pwd default-directory)
          (is-rebuild (consp n))
          (sources
-          (list (car (anything-c-sources-milkode-files pwd is-rebuild))
-                anything-c-source-milkode-packages)))
+          (list (car (helm-c-sources-milkode-files pwd is-rebuild))
+                helm-c-source-milkode-packages)))
     (when is-rebuild
-      (kill-buffer " *anything candidates:Milkode Packages*"))
-    (anything-other-buffer sources
-                           (format "*anything milkode files*"))))
+      (kill-buffer " *helm candidates:Milkode Packages*"))
+    (helm-other-buffer sources
+                           (format "*helm milkode files*"))))
 
-;; 
+;;
 
-(provide 'anything-milkode)
-;;; anything-milkode.el ends here
+(provide 'helm-milkode)
+;;; helm-milkode.el ends here
