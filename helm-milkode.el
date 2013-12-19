@@ -29,7 +29,7 @@
 ;;; Commentary:
 
 ;;; Install:
-;;   (auto-install-from-url "http://www.emacswiki.org/cgi-bin/wiki/download/helm-grep.el")
+;;   (auto-install-from-url "https://raw.github.com/emacs-helm/helm/master/helm-grep.el")
 ;;   (auto-install-from-url "https://raw.github.com/ongaeshi/emacs-milkode/master/milkode.el")
 ;;   (auto-install-from-url "https://raw.github.com/ongaeshi/emacs-milkode/master/helm-milkode.el")
 
